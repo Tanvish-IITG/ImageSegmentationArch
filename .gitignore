@@ -3,3 +3,4 @@ File_to_be_deleted*
 logs
 *.pyc
 __pycache__
+*.tar.xz

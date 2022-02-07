@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Encoder(torch.nn.Module):
-      def __init__(self):
+      def __init__(self,inp_ch:int):
           super().__init__()
-          self.conv1_1 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)
+          self.conv1_1 = nn.Conv2d(in_channels=inp_ch, out_channels=64, kernel_size=3, padding=1)
           self.conv1_2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1)
 
           self.conv2_1 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1)
@@ -78,10 +78,10 @@ class Decoder(torch.nn.Module):
             return x
 
 class VGG16(torch.nn.Module):
-      def __init__(self):
+      def __init__(self,inp_ch = 32,out_ch = 32):
             super().__init__()
-            self.encoder = Encoder()
-            self.decoder = Decoder(512,(256,128,64),32)
+            self.encoder = Encoder(inp_ch)
+            self.decoder = Decoder(512,(256,128,64),out_ch)
 
       def forward(self, img):
             

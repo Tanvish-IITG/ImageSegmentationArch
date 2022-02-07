@@ -6,7 +6,7 @@ import numpy as np
 from Metrix import HarmonicMean, CM, Weight
 import torch.optim as optimizers
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def EarlyStopping(valid_loss,model,PATH):
     if(valid_loss < EarlyStopping.best_loss): 
@@ -32,7 +32,7 @@ def Step(model, batch, opt, loss_fun):
 
 
 
-def train_model(model, batch, n_epochs, opt, PATH):
+def train_model(model, batch, n_epochs, opt, PATH, device):
 
     # Initialize the early stopping object
     EarlyStopping.stop = False
@@ -49,9 +49,9 @@ def train_model(model, batch, n_epochs, opt, PATH):
     # Initialize the weighted loss function
     w = torch.zeros((8), dtype=torch.float32, device = device)
     for _, target in val_dl:
-        w = torch.add(w,Weight(target))
+        w = torch.add(w,Weight(target).to(device))
     for _, target in train_dl:
-        w = torch.add(w,Weight(target))
+        w = torch.add(w,Weight(target).to(device))
 
     w = w / l
     w = torch.div(1,w)
@@ -74,6 +74,7 @@ def train_model(model, batch, n_epochs, opt, PATH):
 
         model.train() # prep model for training
         for batch, (data, target) in enumerate(train_dl, 1):
+            data, target = data.to(device), target.to(device)
             # clear the gradients of all optimized variables
             opt.zero_grad()
             # forward pass: compute predicted outputs by passing inputs to the model
@@ -96,6 +97,7 @@ def train_model(model, batch, n_epochs, opt, PATH):
         Unions = []
         # Initialize the list for different matrics
         for data, target in val_dl:
+            data, target = data.to(device), target.to(device)
             # forward pass: compute predicted outputs by passing inputs to the model
             output = model(data)
             # calculate the loss
@@ -144,6 +146,8 @@ def train_model(model, batch, n_epochs, opt, PATH):
         print("mPrecision: ",Precision)
         print("mRecall: ",Recall)
         print("mF_score: ",mF_score)
+
+        print("FP: ", mFP ," TP: ", mTP, " FN: ", mFN, " TN: ", mTN)
         
         # clear lists to track next epoch
         train_losses = []
@@ -160,6 +164,6 @@ def train_model(model, batch, n_epochs, opt, PATH):
     return  avg_train_losses, avg_valid_losses
 
 if __name__ == "__main__":
-    model = Network()
-    train_model(model,2,1,optimizers.Adam(model.parameters()),"./logs/Train_test.pt")
+    model = Network(256,8)
+#    train_model(model,2,1,optimizers.Adam(model.parameters()),"./logs/Train_test.pt","cpu")
     

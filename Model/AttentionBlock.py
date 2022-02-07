@@ -84,9 +84,9 @@ class CBAM(nn.Module):
 
 
 class AttentionBlock(nn.Module):
-    def __init__(self):
+    def __init__(self,size:int,classes:int):
         super().__init__()
-        self.pypool = PyPool([2,4,8,16,32,64],[2,4,8,16,32,64],32,(512,512))
+        self.pypool = PyPool([2,4,8,16,32,64],[2,4,8,16,32,64],32,(size,size))
         self.ConvBlock1 = nn.Sequential(nn.Conv2d(44,32,3,padding="same"),
                             nn.ReLU(),
                             nn.Conv2d(32,32,3,padding="same"),
@@ -94,7 +94,7 @@ class AttentionBlock(nn.Module):
         self.CBAM = CBAM(32)
         self.ConvBlock2 = nn.Sequential(nn.Conv2d(32,32,3,padding="same"),
                             nn.ReLU(),
-                            nn.Conv2d(32,8,3,padding="same"),
+                            nn.Conv2d(32,classes,3,padding="same"),
                             nn.ReLU6())
                         
     def forward(self,x:torch.Tensor):
@@ -106,8 +106,8 @@ class AttentionBlock(nn.Module):
 
 
 if __name__ == "__main__":
-    t = torch.rand((2,64,256,256))
-    cm = AttentionBlock()
+    t = torch.rand((2,32,256,256))
+    cm = AttentionBlock(256)
     y = cm(t)
     print(y.shape)
 
