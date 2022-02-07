@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 from cv2 import imread, IMREAD_GRAYSCALE
 from PIL import Image
 import os
+import math
 
 import sys
 
@@ -40,12 +41,12 @@ def combinechannel(img):
 
 
 transformSeg = torch.nn.Sequential(
+                transforms.Resize((256,256)),
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomVerticalFlip(),
                 transforms.RandomAffine(
                                degrees=15, translate=(0.02, 0.02), scale=(0.9, 1.1),
                                shear=15),
-                transforms.RandomResizedCrop(512,scale = (0.8,1))
 )
 
 Random_Crop = torch.nn.Sequential(
@@ -82,8 +83,11 @@ class DatasetSegmentation(data.Dataset):
         if(img.shape[1:] != label.shape[1:]):
             print(mask_path)
             return (0,0)
-        
+
+        l = min(label.shape[1],label.shape[2])
+        l = 2**int(math.log2(l))
         data_tensor = torch.cat([img,label],0)
+        data_tensor = transforms.RandomCrop((l,l))(data_tensor)
 
         if self.transform:
           data_tensor = self.transform(data_tensor)
@@ -94,5 +98,15 @@ class DatasetSegmentation(data.Dataset):
 
 if __name__ == "__main__":
     train_dl = DatasetSegmentation("./data/train/SUIMDATA/train_val","images","masks",transform=transformSeg)
-    for img,mask in train_dl:
-        pass
+    img, label = train_dl[int(sys.argv[1])]
+    import matplotlib.pyplot as plt
+    plt.subplot(1, 2, 1) # row 1, col 2 index 1
+    plt.imshow(img.permute((1,2,0)))
+    plt.title("Image")
+  
+
+    plt.subplot(1, 2, 2) # index 2
+    plt.imshow(label)
+    plt.title("Label")
+
+    plt.show()
