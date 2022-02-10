@@ -31,7 +31,7 @@ class ContextModule(nn.Module):
         x2 = self.ConvBlock2(x)
         x3 = self.ConvBlock3(x)
         x4 = self.ConvBlock4(x)
-        out = torch.cat([x1,x2,x3,x4], dim = 1)
+        out = torch.cat([x,x1,x2,x3,x4], dim = 1)
         return out
 
 if __name__ == "__main__":

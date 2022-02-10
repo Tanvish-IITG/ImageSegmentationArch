@@ -9,7 +9,7 @@ class Network(nn.Module):
     def __init__(self,size:int, classes:int):
         super().__init__()
         self.cm = ContextModule()
-        self.vgg = VGG16()
+        self.vgg = VGG16(35,32)
         self.ab = AttentionBlock(size,classes)
 
     def forward(self,x:torch.Tensor):
